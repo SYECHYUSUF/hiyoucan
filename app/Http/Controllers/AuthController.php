@@ -7,16 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
-    // Tampilkan Form Register
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    // Proses Register
     public function register(Request $request)
     {
         $request->validate([
@@ -26,11 +25,7 @@ class AuthController extends Controller
             'role' => ['required', 'in:buyer,seller'],
         ]);
 
-        // Tentukan Status Seller
-        $sellerStatus = null;
-        if ($request->role === 'seller') {
-            $sellerStatus = 'pending';
-        }
+        $sellerStatus = ($request->role === 'seller') ? 'pending' : null;
 
         $user = User::create([
             'name' => $request->name,
@@ -42,7 +37,6 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        // Redirect Seller Baru ke Halaman Pending
         if ($user->role === 'seller') {
             return redirect()->route('seller.pending');
         }
@@ -50,57 +44,88 @@ class AuthController extends Controller
         return redirect()->route('dashboard');
     }
 
-    // Tampilkan Form Login
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    // Proses Login (INI YANG TADI ERROR)
     public function login(Request $request)
     {
-        // 1. Validasi Input & Simpan ke variabel $credentials
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // 2. Coba Login
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             
             /** @var \App\Models\User $user */
             $user = Auth::user();
 
-            // A. Cek Admin
             if ($user->role === 'admin') {
                 return redirect('/admin');
             }
 
-            // B. Cek Seller
             if ($user->role === 'seller') {
-                // Jika belum approved, lempar ke halaman pending
                 if ($user->seller_status !== 'approved') {
                     return redirect()->route('seller.pending');
                 }
-                return redirect('/admin'); // Jika approved, masuk Filament
+                return redirect('/admin');
             }
 
-            // C. Buyer
             return redirect()->intended('dashboard');
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
+        return back()->withErrors(['email' => 'Email atau password salah.'])->onlyInput('email');
     }
 
-    // Proses Logout
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');
+    }
+
+    // --- FITUR EDIT PROFIL (BARU) ---
+
+    public function editProfile()
+    {
+        return view('auth.settings', ['user' => Auth::user()]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'avatar' => ['nullable', 'image', 'max:2048'], // Max 2MB
+            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        // Handle Upload Foto
+        if ($request->hasFile('avatar')) {
+            // Hapus foto lama jika ada
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            // Simpan foto baru
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $path;
+        }
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        /** @var \App\Models\User $user */
+        $user->save();
+
+        return back()->with('success', 'Profil berhasil diperbarui ✨');
     }
 }

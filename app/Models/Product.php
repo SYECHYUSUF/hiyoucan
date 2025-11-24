@@ -7,13 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+// --- IMPORT MODEL LAIN AGAR TIDAK ERROR "CLASS NOT FOUND" ---
+use App\Models\Store;
+use App\Models\Category;
+use App\Models\User;
+use App\Models\Review;
+use App\Models\CartItem;
+use App\Models\OrderItem;
+
 class Product extends Model
 {
     use HasFactory;
 
     /**
-     * Atribut yang boleh diisi secara massal (Mass Assignment).
-     * Penting: store_id dan user_id harus ada agar logika CreateProduct berjalan.
+     * Atribut yang boleh diisi secara massal.
      */
     protected $fillable = [
         'store_id',      // ID Toko pemilik produk
@@ -90,4 +97,4 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
-}   
+}

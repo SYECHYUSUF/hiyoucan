@@ -1,10 +1,4 @@
 <x-layouts.app>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Keranjang Belanja') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12 bg-pink-50 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-3xl border border-pink-100 p-8">
@@ -16,6 +10,12 @@
                 @if(session('success'))
                     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                         {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {{ session('error') }}
                     </div>
                 @endif
 
@@ -80,16 +80,25 @@
                         </table>
                     </div>
 
-                    <div class="mt-8 flex justify-end items-center gap-8">
-                        <div class="text-right">
-                            <p class="text-gray-500">Total Belanja</p>
-                            <p class="text-3xl font-bold text-pink-600">Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
-                        </div>
+                    <div class="mt-8 bg-gray-50 p-6 rounded-2xl border border-gray-200">
                         <form action="{{ route('checkout') }}" method="POST">
                             @csrf
-                            <button type="submit" class="bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-800 shadow-xl transition transform hover:-translate-y-1">
-                                Checkout Sekarang
-                            </button>
+                            
+                            <label class="block font-bold text-gray-700 mb-2">📍 Alamat Pengiriman</label>
+                            <textarea name="address" rows="3" required
+                                class="w-full rounded-xl border-gray-300 focus:border-pink-500 focus:ring-pink-500 mb-4 p-3"
+                                placeholder="Masukkan alamat lengkap pengiriman (Jalan, No. Rumah, Kota, Kode Pos)..."></textarea>
+
+                            <div class="flex justify-between items-center border-t border-gray-200 pt-4">
+                                <div>
+                                    <p class="text-gray-500 text-sm">Total Pembayaran</p>
+                                    <p class="text-3xl font-bold text-pink-600">Rp {{ number_format($grandTotal, 0, ',', '.') }}</p>
+                                </div>
+                                
+                                <button type="submit" class="bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-800 shadow-xl transition transform hover:-translate-y-1">
+                                    Checkout Sekarang
+                                </button>
+                            </div>
                         </form>
                     </div>
                 @endif

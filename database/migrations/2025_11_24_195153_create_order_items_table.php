@@ -9,23 +9,26 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    // Dalam file migrasi OrderItem:
-
-public function up(): void
-{
-    Schema::create('order_items', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('order_id')->constrained()->onDelete('cascade'); // Hapus item jika Order dihapus
-        
-        // Product ID: Gunakan onDelete('set null') untuk menghindari Error 1451
-        $table->foreignId('product_id')->nullable()->constrained()->onDelete('set null'); 
-        
-        $table->string('product_name'); // Simpan nama dan harga saat checkout (snapshot)
-        $table->decimal('price', 10, 2);
-        $table->integer('quantity');
-        $table->timestamps();
-    });
-}
+    public function up(): void
+    {
+        // Cek apakah tabel sudah ada sebelum membuatnya
+        if (!Schema::hasTable('order_items')) {
+            Schema::create('order_items', function (Blueprint $table) {
+                $table->id();
+                
+                // Relasi ke tabel Orders (Cascade: Hapus order -> hapus itemnya juga)
+                $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+                
+                // Relasi ke tabel Products
+                $table->foreignId('product_id')->constrained();
+                
+                $table->integer('quantity');
+                $table->decimal('price', 12, 2); // Harga saat dibeli (snapshot harga)
+                
+                $table->timestamps();
+            });
+        }
+    }
 
     /**
      * Reverse the migrations.

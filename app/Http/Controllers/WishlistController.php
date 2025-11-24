@@ -14,21 +14,27 @@ class WishlistController extends Controller
         return view('wishlist.index', compact('wishlists'));
     }
 
-    public function toggle($productId)
+    public function toggle(Request $request, $productId)
     {
+        if (!Auth::check()) {
+            return response()->json(['status' => 'error', 'message' => 'Login dulu ya!'], 401);
+        }
+
         $user = Auth::user();
-        
         $exists = Wishlist::where('user_id', $user->id)->where('product_id', $productId)->first();
 
         if ($exists) {
             $exists->delete();
-            $message = 'Produk dihapus dari Wishlist';
+            $message = 'Dihapus dari Wishlist 💔';
+            $action = 'removed';
         } else {
-            Wishlist::create([
-                'user_id' => $user->id,
-                'product_id' => $productId
-            ]);
-            $message = 'Produk ditambahkan ke Wishlist';
+            Wishlist::create(['user_id' => $user->id, 'product_id' => $productId]);
+            $message = 'Masuk Wishlist ❤️';
+            $action = 'added';
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['status' => 'success', 'message' => $message, 'action' => $action]);
         }
 
         return back()->with('success', $message);
