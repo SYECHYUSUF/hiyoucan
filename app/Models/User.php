@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -21,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',           // <--- WAJIB ADA: Agar bisa simpan 'seller'/'admin'
+        'seller_status',  // <--- WAJIB ADA: Agar bisa simpan 'pending'
     ];
 
     /**
@@ -45,14 +48,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
-    public function store()
-        {
+    
+    // Relasi ke Toko (Seller punya satu toko)
+    public function store(): HasOne
+    {
         return $this->hasOne(Store::class);
-        }
-        
-    public function wishlists(): \Illuminate\Database\Eloquent\Relations\HasMany
-        {
-            return $this->hasMany(Wishlist::class);
-        }
+    }
+
+    // Relasi ke Wishlist (Buyer punya banyak wishlist)
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
 }

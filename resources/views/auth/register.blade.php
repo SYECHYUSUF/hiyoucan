@@ -40,24 +40,31 @@
                 <label class="block text-gray-700 text-sm font-bold mb-2">Confirm Password</label>
                 <input type="password" name="password_confirmation" class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition" placeholder="••••••••" required>
             </div>
-            
-            <div class="mb-6">
-    <label class="block text-gray-700 text-sm font-bold mb-2">Daftar Sebagai</label>
-    <div class="flex gap-4">
-        <label class="flex items-center gap-2 cursor-pointer bg-gray-50 px-4 py-3 rounded-xl border border-gray-200 w-1/2 has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50">
-            <input type="radio" name="role" value="buyer" class="peer accent-pink-500" checked>
-            <span class="text-gray-700 font-medium">Buyer (Pembeli)</span>
-        </label>
-        <label class="flex items-center gap-2 cursor-pointer bg-gray-50 px-4 py-3 rounded-xl border border-gray-200 w-1/2 has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50">
-            <input type="radio" name="role" value="seller" class="peer accent-pink-500">
-            <span class="text-gray-700 font-medium">Seller (Penjual)</span>
-        </label>
-    </div>
-</div>
 
-<button type="submit" class="w-full bg-pink-500 text-white font-bold py-3 rounded-xl hover:bg-pink-600 transition shadow-lg shadow-pink-500/30">
-    Register Now
-</button>
+            <div class="mb-8">
+                <label class="block text-gray-700 text-sm font-bold mb-3">Daftar Sebagai</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="cursor-pointer relative">
+                        <input type="radio" name="role" value="buyer" class="peer sr-only" checked>
+                        <div class="p-4 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 transition peer-checked:border-pink-500 peer-checked:bg-pink-50 peer-checked:text-pink-700 text-center">
+                            <div class="text-2xl mb-1">🛍️</div>
+                            <div class="font-bold text-sm">Buyer</div>
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer relative">
+                        <input type="radio" name="role" value="seller" class="peer sr-only">
+                        <div class="p-4 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 transition peer-checked:border-pink-500 peer-checked:bg-pink-50 peer-checked:text-pink-700 text-center">
+                            <div class="text-2xl mb-1">💼</div>
+                            <div class="font-bold text-sm">Seller</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-pink-500 text-white font-bold py-3 rounded-xl hover:bg-pink-600 transition shadow-lg shadow-pink-500/30">
+                Register Now
+            </button>
         </form>
 
         <p class="text-center text-gray-500 text-sm mt-6">
