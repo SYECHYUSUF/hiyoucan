@@ -13,9 +13,15 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductResource extends Resource
 {
+    use HasFactory, SoftDeletes;
     protected static ?string $model = Product::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag'; // Ikon Tas Belanja
@@ -71,6 +77,7 @@ class ProductResource extends Resource
                                     ->unique(Product::class, 'slug', ignoreRecord: true),
 
                                 Forms\Components\RichEditor::make('description')
+                                    ->required()
                                     ->label('Deskripsi')
                                     ->columnSpanFull(),
                             ]),
