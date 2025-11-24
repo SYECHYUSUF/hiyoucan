@@ -45,8 +45,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
     public function store()
-{
-    return $this->hasOne(Store::class);
-}
+        {
+        return $this->hasOne(Store::class);
+        }
+        
+    public function wishlists(): \Illuminate\Database\Eloquent\Relations\HasMany
+        {
+            return $this->hasMany(Wishlist::class);
+        }
 }

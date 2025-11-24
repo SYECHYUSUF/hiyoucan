@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.app>
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-3xl p-8 mb-8 border border-pink-100 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -37,8 +37,9 @@
                             <div class="text-left md:text-right">
                                 <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide
                                     {{ $order->status === 'completed' ? 'bg-green-100 text-green-600' : 
-                                      ($order->status === 'pending' ? 'bg-yellow-100 text-yellow-600' : 'bg-blue-100 text-blue-600') }}">
-                                    {{ $order->status }}
+                                      ($order->status === 'cancelled' ? 'bg-red-100 text-red-600' : 
+                                      ($order->status === 'pending' ? 'bg-yellow-100 text-yellow-600' : 'bg-blue-100 text-blue-600')) }}">
+                                    {{ ucfirst($order->status) }}
                                 </span>
                                 <p class="mt-2 font-bold text-brand-600 text-xl">Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
                             </div>
@@ -51,10 +52,32 @@
                                     <img src="{{ $item->product->image_path ? asset('storage/' . $item->product->image_path) : 'https://via.placeholder.com/50' }}" 
                                          class="w-full h-full object-cover">
                                 </div>
+                                
                                 <div class="flex-1">
                                     <p class="text-sm font-bold text-gray-800">{{ $item->product->name }}</p>
                                     <p class="text-xs text-gray-500">{{ $item->quantity }} x Rp {{ number_format($item->price, 0, ',', '.') }}</p>
                                 </div>
+
+                                @if($order->status === 'completed')
+                                    @php
+                                        // Cek apakah user sudah mereview produk ini di order ini
+                                        $alreadyReviewed = \App\Models\Review::where('user_id', Auth::id())
+                                            ->where('product_id', $item->product_id)
+                                            ->where('order_id', $order->id)
+                                            ->exists();
+                                    @endphp
+
+                                    @if(!$alreadyReviewed)
+                                        <a href="{{ route('reviews.create', ['product' => $item->product_id, 'order' => $order->id]) }}" 
+                                           class="bg-pink-100 text-pink-600 text-xs font-bold px-3 py-1.5 rounded-full hover:bg-pink-500 hover:text-white transition">
+                                            ★ Beri Ulasan
+                                        </a>
+                                    @else
+                                        <span class="text-xs text-green-500 font-bold px-3 py-1.5 border border-green-200 rounded-full bg-green-50">
+                                            ✓ Ulasan Terkirim
+                                        </span>
+                                    @endif
+                                @endif
                             </div>
                             @endforeach
                         </div>
@@ -65,4 +88,4 @@
         </div>
         
     </div>
-</x-app-layout>
+</x-layouts.app>

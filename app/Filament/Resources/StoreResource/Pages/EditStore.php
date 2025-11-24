@@ -13,7 +13,15 @@ class EditStore extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            // Seller tidak boleh menghapus tokonya sendiri sembarangan, 
+            // tapi Admin boleh. Kita sembunyikan delete jika bukan admin.
+            Actions\DeleteAction::make()
+                ->visible(fn () => \Illuminate\Support\Facades\Auth::user()->role === 'admin'),
         ];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

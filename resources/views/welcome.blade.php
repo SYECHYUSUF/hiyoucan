@@ -45,7 +45,7 @@
 
                 <div class="hidden md:flex space-x-8">
                     <a href="#" class="text-gray-500 hover:text-brand-600 transition font-medium">Home</a>
-                    <a href="#products" class="text-gray-500 hover:text-brand-600 transition font-medium">Shop Skincare</a>
+                    <a href="{{ route('shop.index') }}" class="text-gray-500 hover:text-brand-600 transition font-medium">Shop Skincare</a>
                     <a href="#" class="text-gray-500 hover:text-brand-600 transition font-medium">About Us</a>
                 </div>
 

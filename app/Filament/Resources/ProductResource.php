@@ -18,26 +18,23 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-beaker'; // Ikon ala skincare/kimia
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag'; // Ikon Tas Belanja
 
-    protected static ?string $navigationGroup = 'Store Management';
+    protected static ?string $navigationGroup = 'Store Management'; // Gabung dengan menu Store
 
-    // Query untuk membatasi Seller hanya melihat produk mereka sendiri
+    protected static ?int $navigationSort = 2; // Urutan ke-2 setelah Store
+
+    // Logic: Seller hanya melihat produknya sendiri, Admin melihat semua
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
         $user = Auth::user();
 
-        if ($user && $user->role === 'admin') {
+        if ($user->role === 'admin') {
             return $query;
         }
 
-        // Asumsi: Produk terhubung ke Seller via store_id -> Store -> User
-        // Atau jika Product langsung punya user_id (tergantung struktur database terakhir)
-        // Di migrasi 'products' yang kita buat, ada 'store_id' DAN 'user_id' (opsional). 
-        // Mari kita gunakan user_id dulu agar aman sesuai migrasi terakhir.
-        
-        return $query->where('user_id', $user->id); 
+        return $query->where('user_id', $user->id);
     }
 
     public static function form(Form $form): Form
@@ -48,28 +45,43 @@ class ProductResource extends Resource
                     ->schema([
                         Forms\Components\Section::make('Informasi Produk')
                             ->schema([
+                                // LOGIC TOKO:
+                                // Jika Admin: Bisa pilih toko mana saja.
+                                // Jika Seller: Field ini Readonly (terisi otomatis).
+                                Forms\Components\Select::make('store_id')
+                                    ->label('Toko')
+                                    ->relationship('store', 'name')
+                                    ->required()
+                                    // Admin boleh cari toko, Seller cuma lihat tokonya sendiri
+                                    ->disabled(fn () => Auth::user()->role !== 'admin') 
+                                    ->default(fn () => Auth::user()->store?->id) // Auto-fill seller store
+                                    ->dehydrated(), // Tetap kirim data walau disabled
+
                                 Forms\Components\TextInput::make('name')
                                     ->label('Nama Produk')
                                     ->required()
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
 
+                                // ... sisa form sama seperti sebelumnya ...
                                 Forms\Components\TextInput::make('slug')
                                     ->disabled()
                                     ->dehydrated()
-                                    ->required(),
+                                    ->required()
+                                    ->unique(Product::class, 'slug', ignoreRecord: true),
 
                                 Forms\Components\RichEditor::make('description')
                                     ->label('Deskripsi')
                                     ->columnSpanFull(),
                             ]),
-
+                        
+                        // ... Form Gambar ...
                         Forms\Components\Section::make('Gambar')
                             ->schema([
                                 Forms\Components\FileUpload::make('image_path')
-                                    ->label('Foto Produk')
                                     ->image()
                                     ->directory('products')
+                                    ->required()
                                     ->columnSpanFull(),
                             ]),
                     ])->columnSpan(2),
@@ -79,7 +91,7 @@ class ProductResource extends Resource
                         Forms\Components\Section::make('Detail & Harga')
                             ->schema([
                                 Forms\Components\TextInput::make('price')
-                                    ->label('Harga (IDR)')
+                                    ->label('Harga')
                                     ->numeric()
                                     ->prefix('Rp')
                                     ->required(),
@@ -87,14 +99,15 @@ class ProductResource extends Resource
                                 Forms\Components\TextInput::make('stock')
                                     ->label('Stok')
                                     ->numeric()
-                                    ->default(0)
+                                    ->default(1)
                                     ->required(),
 
                                 Forms\Components\Select::make('category_id')
+                                    ->label('Kategori')
                                     ->relationship('category', 'name')
                                     ->required()
-                                    ->searchable()
                                     ->preload()
+                                    ->searchable()
                                     ->createOptionForm([
                                         Forms\Components\TextInput::make('name')
                                             ->required()
@@ -106,22 +119,19 @@ class ProductResource extends Resource
                     ])->columnSpan(1),
             ])->columns(3);
     }
-
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('image_path')
-                    ->label('Foto'),
+                Tables\Columns\ImageColumn::make('image_path')->label('Foto'),
                 
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable()
-                    ->description(fn (Product $record) => Str::limit(strip_tags($record->description), 50)),
+                    ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('category.name')
                     ->label('Kategori')
-                    ->sortable()
                     ->badge()
                     ->color('info'),
 
