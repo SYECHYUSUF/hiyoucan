@@ -3,19 +3,11 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\CreateRecord;
 
-class EditUser extends EditRecord
+class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\DeleteAction::make(),
-        ];
-    }
     
     protected function getRedirectUrl(): string
     {

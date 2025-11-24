@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryResource extends Resource
 {
@@ -19,6 +20,11 @@ class CategoryResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     
     protected static ?string $navigationGroup = 'Admin Management';
+
+    public static function canViewAny(): bool
+    {
+        return Auth::user()->role === 'admin';
+    }
 
     public static function form(Form $form): Form
     {
